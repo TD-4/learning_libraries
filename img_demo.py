@@ -8,9 +8,10 @@ import scipy
 import skimage
 from skimage import io,transform
 
+
 def PIL_demo():
     # 1、读取图片
-    img = Image.open('images/JPEG图像 2.jpeg')
+    img = Image.open('images/0(13)-0_SuperAIProExp_resize.bmp')
 
     # 2、显示图片/保存图片
     img.show()  # 展示图片
@@ -184,8 +185,8 @@ def skimage_demo():
 
 
 if __name__ == "__main__":
-    # PIL_demo()
-    Matplotlib_demo()
+    PIL_demo()
+    # Matplotlib_demo()
     # CV2_demo()
     # scipy_demo()
     # skimage_demo()
