@@ -33,4 +33,4 @@ def gen_mean_std(root_path=""):
 
 
 if __name__ == "__main__":
-    gen_mean_std(root_path="F:\\industry\\industry1_7\\lcd_\\industry1_7\\img")
+    gen_mean_std(root_path="F:\\industry\\industry1_20\\industry1_20\\img")

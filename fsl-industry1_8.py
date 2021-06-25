@@ -121,19 +121,105 @@ def get_images_path(path="", output_path="", fg_value=""):
     print("deal {} images".format(count))
 
 
+def pi_deal(images_path="", masks_path="", output_imgs_path="", output_masks_path="",output_masks_gray_path="",
+        English=True, pre_name="pi_off_", bg_value=255, fg_value=8):
+    """
+    1、修改mask值
+    2、分割
+    3、选择有object物体
+    4、得到images和mask
+    """
+    all_images = os.listdir(images_path)
+    count = 0   # 统计一共处理多少张大图
+    all_count = 0   # 统计一共得到多少张小图
+    for img_path in all_images:
+        img = cv2.imdecode(np.fromfile(os.path.join(images_path, img_path), dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
+        mask = cv2.imdecode(np.fromfile(os.path.join(masks_path, img_path[:-4] + "_label.png"), dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
+
+        # 1、修改mask值
+        mask = np.where(mask == bg_value, 0, fg_value)
+
+        H = img.shape[0]
+        W = img.shape[1]
+        assert H == 5000 and W == 8000
+        hh = 125
+        ww = 125
+        # 2、切割
+        for x in range(0, int(H/hh)):
+            for y in range(0, int(W/ww)):
+                roiImg_img = img[x * hh:(x+1)*hh, y*ww:(y+1)*ww]
+                roiImg_mask = mask[x * hh:(x+1)*hh, y*ww:(y+1)*ww]
+
+                # 3、选择只有object的图片
+                if len(set(np.asarray(roiImg_mask).flatten())) == 1:  # 如果只有背景舍弃
+                    continue
+                print("get one from {}".format(count))
+                # 4、合并img和mask
+                roiImg_mask_gray = roiImg_mask
+                roiImg_mask_gray = np.where(roiImg_mask_gray == 0, 255, fg_value)
+                roiImg_mask_gray = np.hstack([roiImg_img, roiImg_mask_gray])
+
+                if English: # 重命名
+                    output_img_path = os.path.join(output_imgs_path,
+                                                   pre_name + str(count) + "_" + str(x) + "-" + str(y) + ".bmp")
+                    output_mask_path = os.path.join(output_masks_path,
+                                                    pre_name + str(count) + "_" + str(x) + "-" + str(y) + ".png")
+                    output_mask_gray_path = os.path.join(output_masks_gray_path,
+                                                    pre_name + str(count) + "_" + str(x) + "-" + str(y) + ".png")
+                else:
+                    output_img_path = os.path.join(output_imgs_path,
+                                                   img_path.split(".")[0] + "_" + str(x)+"-"+str(y) + ".bmp")
+                    output_mask_path = os.path.join(output_masks_path,
+                                                   img_path.split(".")[0] + "_" + str(x)+"-"+str(y) + ".png")
+                    output_mask_gray_path = os.path.join(output_masks_gray_path,
+                                                         pre_name + str(count) + "_" + str(x) + "-" + str(y) + ".png")
+
+                is_success_img, img_buff_arr = cv2.imencode('.bmp', roiImg_img)
+                is_success_mask, mask_buff_arr = cv2.imencode('.png', roiImg_mask)
+                is_success_mask, mask_gray_buff_arr = cv2.imencode('.png', roiImg_mask_gray)
+                img_buff_arr.tofile(output_img_path)
+                mask_buff_arr.tofile(output_mask_path)
+                mask_gray_buff_arr.tofile(output_mask_gray_path)
+                all_count += 1
+        count += 1
+
+    print("deal {} images, and get {} images".format(count, all_count))
+
+
 if __name__ == "__main__":
     # 1、修改mask值, 2、切割图片。重复每个文件夹；3、获得object图；4、得到images和mask对应图
-    names = ["0顶伤", "1凹凸点", "2膜翘", "3破损", "4气泡", "5异物", "6印痕"]
-    split_image_mask(images_path="D:\\lcd\\6印痕\\Original",
-                     masks_path="D:\\lcd\\6印痕\\\\Label",
-                     output_imgs_path="D:\\lcd_\\lcd7\\img",
-                     output_masks_path="D:\\lcd_\\lcd7\\mask",
-                     output_masks_gray_path="D:\\lcd_\\lcd7\\mask_gray",
-                     pre_name="lcd7_",
-                     fg_value=7,
-                     bg_value=255)
+    # names = ["0顶伤", "1凹凸点", "2膜翘", "3破损", "4气泡", "5异物", "6印痕"]
+    # split_image_mask(images_path="D:\\lcd\\6印痕\\Original",
+    #                  masks_path="D:\\lcd\\6印痕\\\\Label",
+    #                  output_imgs_path="D:\\lcd_\\lcd7\\img",
+    #                  output_masks_path="D:\\lcd_\\lcd7\\mask",
+    #                  output_masks_gray_path="D:\\lcd_\\lcd7\\mask_gray",
+    #                  pre_name="lcd7_",
+    #                  fg_value=7,
+    #                  bg_value=255)
     # 5、获得此类的classX.txt
-    get_images_path(path="D:\\lcd_\\lcd7\\img",
-                    output_path="D:\\lcd_\\lcd7\\", fg_value=7)
+    # get_images_path(path="D:\\lcd_\\lcd7\\img",
+    #                 output_path="D:\\lcd_\\lcd7\\", fg_value=7)
+
+    # ---- 处理PI数据
+    # 1、修改mask值， 2、分割， 3、选择有object， 4、得到image和mask
+    names = ['PI--BLU OFF', 'PI--BLU ON']
+    # pi_deal(images_path="D:\\felixfu\\data\\0-PI\\PI分割数据\\PI--BLU OFF\\Original",
+    #         masks_path="D:\\felixfu\\data\\0-PI\\PI分割数据\\PI--BLU OFF\\Label",
+    #         output_imgs_path="D:\\felixfu\\data\\pi_\\img",
+    #         output_masks_path="D:\\felixfu\\data\\pi_\\mask",
+    #         output_masks_gray_path="D:\\felixfu\\data\\pi_\\mask_gray",
+    #         pre_name="pi_off_",
+    #         bg_value=255, fg_value=8)
+
+    pi_deal(images_path="D:\\felixfu\\data\\0-PI\\PI分割数据\\PI--BLU ON\\Original",
+            masks_path="D:\\felixfu\\data\\0-PI\\PI分割数据\\PI--BLU ON\\Label",
+            output_imgs_path="D:\\felixfu\\data\\pi_\\img",
+            output_masks_path="D:\\felixfu\\data\\pi_\\mask",
+            output_masks_gray_path="D:\\felixfu\\data\\pi_\\mask_gray",
+            pre_name="pi_on_",
+            bg_value=255, fg_value=8)
+
+    get_images_path(path="D:\\felixfu\\data\\pi_\\img", output_path="D:\\felixfu\\data\\pi_", fg_value=8)
 
 
