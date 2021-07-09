@@ -96,7 +96,8 @@ if __name__ == "__main__":
     # del_leisi_img(path="F:\\Data\\lcd\\20210628\\Edge", pre="20210628")
     # del_leisi_img(path="F:\\Data\\lcd\\20210628\\Midle", pre="20210628")
 
-    del_leisi_img(path="F:\\Data\\lcd\\edge\\20210627", pre="20210627")
+    del_leisi_img(path="F:\\Data\\lcd\\edge\\20210627\\TODO", pre="20210627")
+    #
 
 
 
