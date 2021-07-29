@@ -9,9 +9,9 @@ from PIL import Image
 
 def deal_xt(path=""):
     # 重命名文件夹
-    # all_folders = os.listdir(path)
-    # for i, folder in enumerate(all_folders):
-    #     os.rename(os.path.join(path, folder), os.path.join(path, str(i)))
+    all_folders = os.listdir(path)
+    for i, folder in enumerate(all_folders):
+        os.rename(os.path.join(path, folder), os.path.join(path, str(i)))
 
     # 处理整个文件夹中的每个
     all_folders = sorted(os.listdir(path),key=lambda d:int(d))
@@ -133,14 +133,53 @@ def fix_name_label(path=""):
             count += 1
     print("deal {} images".format(count))
 
-if __name__ == "__main__":
-    # 1、通过label.txt，排序文件，并重新命名
-    # deal_xt(path="F:\\Data\\IQA\\20210423-\\20210423")
-    # 2、重命名文件，并生成score
-    # gen_score(path="F:\\Data\\IQA\\level\\20210423", output="F:\\Data\\IQA\\level\\dst_images")
-    # 3、填充图像，把长方形转成正方形
-    # padding_img(path="F:\\Data\\IQA\\level\\dst_images")
 
+def gen_dataset(in_path="", out_path=""):
+    count = 0
+    all_folders = os.listdir(in_path)
+    for folder in all_folders:  # 遍历文件夹
+        out_img_list = ""
+        best_score = 0
+        for img_p in os.listdir(os.path.join(in_path, folder)):  # 遍历文件夹中文件
+            score = str(float(img_p[:-4]) / 100)
+            out_img = in_path.split("\\")[-1] + "_" + folder + "_" + score + "_.bmp"
+            shutil.copy(os.path.join(in_path, folder, img_p),
+                        os.path.join(out_path, out_img))
+            if float(img_p[:-4])/100 > best_score:
+                best_score = float(img_p[:-4])/100
+                out_img_list = out_img
+        os.rename(os.path.join(out_path, out_img_list),
+                  os.path.join(out_path, "ref_"+out_img_list))
+
+
+def gen_labels(path=""):
+    label_path = os.path.join(path, "labels.txt")
+    all_images = [img for img in os.listdir(path) if re.search(".bmp", img)]
+    ref_images = [img_p for img_p in os.listdir(path) if img_p[:3] == "ref"]
+    with open(label_path, "a+") as file:
+        for img_p in all_images:    # ref_20210423-10_0_0.87_.bmp,20210423-10_0_0.21_.bmp
+            split_img_p = img_p.split("_")
+            score = float(split_img_p[-2])
+            if len(split_img_p) == 4:
+                ref_score = max([img.split("_")[-2] for img in all_images
+                                 if  img.split("_")[-4] == split_img_p[-4] and img.split("_")[-3] == split_img_p[-3] ])
+                ref_name = "ref_" + split_img_p[-4] + "_" + split_img_p[-3] + "_" + str(ref_score) + "_" + split_img_p[-1]
+                file.write("{} {} {}\n".format(img_p, score, ref_name))
+                continue
+            file.write("{} {} {}\n".format(img_p, score, img_p))
+
+
+if __name__ == "__main__":
+    # 方式1------------人工预测
+    # 1、通过label.txt，排序文件，并重新命名
+    # deal_xt(path=r"F:\Data\IQA\level\20210502")
+    # 2、重命名文件，并生成score
+    # gen_score(path=r"F:\Data\IQA\level\dst_images_0cf_real\20210715",
+    #           output=r"F:\Data\IQA\level\dst_images_0cf_real\multilevel")
+    # 3、填充图像，把长方形转成正方形
+    # padding_img(path=r"F:\Data\IQA\level\dst_images_20210502_cf")
+
+    # 方式2------------使用模型做预测
     # 4-1、使用预测结果，标注数据, 重命名
     # labelimg(path="F:\\20210424")
     # 4-2、使用4-1的数据生成数据集
@@ -148,6 +187,12 @@ if __name__ == "__main__":
     # 4-3、padding
     # padding_img(path="F:\\dst_images_20210424")
     # 4-4、修改score
-    fix_name_label(path="F:\\Data\\IQA\\level\\dst_images")
+    # fix_name_label(path="F:\\Data\\IQA\\level\\dst_images")
 
-
+    # 方式3----------- 使用标注数据（百分制）
+    # for name in ["20210423-10", "20210715-10CF", "20210725-4", "20210726-10grid", "20210727-4"]:
+    #     gen_dataset(in_path=r"F:\Data\IQA\level_\{}".format(name),
+    #                 out_path=r"F:\Data\IQA\level_\multilevel_")
+    gen_labels(path=r"F:\Data\IQA\level_\multilevel_")
+    # gen_dataset(in_path=r"F:\Data\IQA\level_\{}".format("20210726_10grid"),
+    #             out_path=r"F:\Data\IQA\level_\multilevel_")

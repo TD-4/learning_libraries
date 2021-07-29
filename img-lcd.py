@@ -85,18 +85,18 @@ def del_leisi_img(path="", pre=""):
 
 
 if __name__ == "__main__":
-    # # 1、从云文档中拷贝文件过来
-    # count_split(input_path="E:\\ShareCache\\IVS13 显示屏客服部\\临时文件良品图像搜集\\深度学习",
-    #             output="F:\\Data\\lcd\\20210628")
+    # 1、从云文档中拷贝文件过来
+    # count_split(input_path=r"F:\缺陷小图",
+    #             output=r"F:\Data\lcd\origin\20210713")
     # # 2、删除Ori图片
-    # del_ori(path="F:\\Data\\lcd\\20210628\\Edge")
-    # del_ori(path="F:\\Data\\lcd\\20210628\\Midle")
+    # del_ori(path=r"F:\Data\lcd\origin\20210713\Edge")
+    # del_ori(path=r"F:\Data\lcd\origin\20210713\Midle")
 
     # 3、删除相似图片
-    # del_leisi_img(path="F:\\Data\\lcd\\20210628\\Edge", pre="20210628")
-    # del_leisi_img(path="F:\\Data\\lcd\\20210628\\Midle", pre="20210628")
+    del_leisi_img(path=r"F:\Data\lcd\origin\20210713\Edge", pre="20210713")
+    del_leisi_img(path=r"F:\Data\lcd\origin\20210713\Midle", pre="20210713")
 
-    del_leisi_img(path="F:\\Data\\lcd\\edge\\20210627\\TODO", pre="20210627")
+    # del_leisi_img(path="F:\\Data\\lcd\\midle\\20210628", pre="20210628")
     #
 
 

@@ -67,16 +67,27 @@ def change_json(root_path=""):
         imageData = base64.b64encode(imageData).decode("utf-8")     # 获得原图 二进制内容
 
         # 修改json中的内容
-        with open(os.path.join(root_path, json_p), 'r') as load_f:
+        with open(os.path.join(root_path, json_p), 'r',encoding='UTF-8') as load_f:
             label_json = json.load(load_f)
         label_json['imageData'] = imageData
         label_json['imagePath'] = bmp_p
         # 保存json
-        with open(os.path.join(root_path, json_p), "w") as dump_f:
+        with open(os.path.join(root_path, json_p), "w", encoding='UTF-8') as dump_f:
             json.dump(label_json, dump_f, ensure_ascii=False, indent=2)
 
         # 删除原来的png
         os.remove(os.path.join(root_path, png_p))
+
+
+def bmp2png(root_path="", origin_path= r"F:\Data\LandingAI\20210726-origin"):
+    bmp_images = [img_p for img_p in os.listdir(root_path) if img_p[-3:] == "bmp"]
+    for img_p in bmp_images:
+        # file_path = os.path.join(root_path, img_p)
+        # img = cv2.imdecode(np.fromfile(file_path, dtype=np.uint8), -1)
+        # cv2.imencode('.png', img)[1].tofile(os.path.join(root_path, img_p[:-3] + "png"))
+        os.rename(os.path.join(root_path, img_p), os.path.join(root_path, img_p[:-3] + "png"))
+
+        shutil.copy(os.path.join(origin_path, img_p), os.path.join(root_path, img_p))
 
 
 def json2img(root_path=""):
@@ -129,4 +140,5 @@ def json2img(root_path=""):
 if __name__ == "__main__":
 
     # json2img(root_path="C:\\Users\\F04396\\Desktop\\t1")  # 测试使用&学习使用
-    change_json(root_path="C:\\Users\\F04396\\Desktop\\t1")     # 修改json文件中的imageData和imagePath字段
+    # bmp2png(r"F:\Data\LandingAI\标后", r"F:\Data\LandingAI\20210726-origin")
+    # change_json(root_path=r"F:\Data\LandingAI\标后")     # 修改json文件中的imageData和imagePath字段
